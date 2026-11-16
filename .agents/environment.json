@@ -1,0 +1,3 @@
+{
+  "install": "export PATH=\"/home/antigravity/flutter/bin:$PATH\" && flutter pub get"
+}
