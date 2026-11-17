@@ -7,8 +7,9 @@ import '../utils/app_colors.dart';
 import '../widgets/sound_service.dart';
 import '../widgets/steam_animation.dart';
 import 'brewing_station_screen.dart';
-import 'caravan_garage_screen.dart';
-import 'caravan_map_screen.dart';
+import '../screens3d/caravan_3d_garage_screen.dart';
+import '../screens3d/caravan_3d_kitchen_screen.dart';
+import '../screens3d/caravan_3d_map_screen.dart';
 import 'daily_menu_dialog.dart';
 import 'recipe_book_screen.dart';
 import 'settings_screen.dart';
@@ -34,7 +35,7 @@ class HomeScreen extends StatelessWidget {
     );
 
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const CaravanMapScreen()),
+      MaterialPageRoute(builder: (context) => const Caravan3DMapScreen()),
     );
   }
 
@@ -417,7 +418,7 @@ class HomeScreen extends StatelessWidget {
                             if (isRunActive) {
                               SoundService().playClick();
                               Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => const CaravanMapScreen()),
+                                MaterialPageRoute(builder: (context) => const Caravan3DMapScreen()),
                               );
                             } else {
                               _showRegionSelectDialog(context);
@@ -432,18 +433,18 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Caravan Management Row (Garage & Daily Menu)
+              // Caravan Management Row (3D Garage & Daily Menu)
               Row(
                 children: [
                   Expanded(
                     child: _buildHubCard(
-                      title: 'Karavan Garajı',
-                      subtitle: 'Filo & Modeller',
+                      title: '3D Karavan Garajı',
+                      subtitle: '360° Filo & Modeller',
                       iconEmoji: '🚐',
                       onTap: () {
                         SoundService().playClick();
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const CaravanGarageScreen()),
+                          MaterialPageRoute(builder: (context) => const Caravan3DGarageScreen()),
                         );
                       },
                     ),
@@ -494,6 +495,59 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Direct 3D Kitchen Practice Card
+              InkWell(
+                onTap: () {
+                  SoundService().playClick();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const Caravan3DKitchenScreen(
+                        isRushHour: false,
+                        isBossFestival: false,
+                        targetCustomerCount: 4,
+                      ),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0369A1), Color(0xFF0C4A6E)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5)),
+                  ),
+                  child: Row(
+                    children: const [
+                      Text('🎮', style: TextStyle(fontSize: 28)),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '3D Karavan Tezgahı & Kafe (Serbest Oyna)',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                            ),
+                            Text(
+                              'İzometrik 3D barista kontrolü, kahve demleme ve bulaşık yıkama',
+                              style: TextStyle(color: Colors.white70, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.play_circle_fill, size: 24, color: Colors.cyanAccent),
+                    ],
+                  ),
+                ),
               ),
 
               const SizedBox(height: 12),

@@ -1,52 +1,45 @@
-# 🚐 Coffee Caravan: Kahve Karavanı (Cozy Roguelite Cafe Management)
+# 🚐 Coffee Caravan: 3D Mobil Kafe & Roguelite Macerası
 
-Steam'deki popüler **Coffee Caravan** tarzında geliştirilmiş; sevimli karavanınızla kasaba kasaba dolaştığınız, prosedürel haritada rotanızı çizdiğiniz, tezgahta kahve demleyip bulaşık yıkadığınız ve festivallere katıldığınız **Flutter tabanlı cozy roguelite kafe yönetim simülasyonu**.
+Steam'deki popüler **Coffee Caravan** (Broccoli Games) oyununun 3D izometrik görsel tarzı ve roguelite mekanikleriyle Flutter & Dart üzerinde sıfırdan geliştirilmiş **3D Cozy Kafe Yönetim Simülasyonu**.
 
 ---
 
-## 🎮 Coffee Caravan Tarzı Temel Mekanikler
+## 🎮 3D Coffee Caravan Özellikleri ve Mekanikleri
 
-### 1. 🗺️ Prosedürel Sefer Haritası (Roguelite Expedition Map - Slay the Spire / FTL Tarzı)
-- **Dallanan Yol Haritası**: Her seferde rastgele üretilen scenic yol haritasında karavanınızı sürün.
-- **Farklı Durak Türleri**:
-  - ☕ **Kahve Molası (Serving Day)**: Yol üstü kasaba halkına sakin servis (3-5 müşteri).
-  - 🔥 **Yoğun Saat (Rush Hour)**: Sabırsız ve hızlı kalabalık, yüksek tempo, çift bahşiş ve itibar riski!
-  - ❓ **Gizemli Yol Hikayeleri (Mystery Events)**: Yolda karşılaşılan otostopçu gezginler, dağ çiftçileri, ani fırtınalar ve seçimlere bağlı ödüller/yadigarlar.
-  - 🛒 **Karavan Pazarı & Mola**: Karavan itibarını onarma (💖 kalp yenileme), yeni yadigarlar (relics) ve yeni kahve tarifleri satın alma.
-  - 🎁 **Tedarik Sandığı (Treasure Drop)**: Yol kenarında bırakılmış sandıktan 3 güçlü lütuftan birini seçme.
-  - 🏆 **Bölge Kahve Festivali (Boss Peak Challenge)**: Michelin jürisi gurme eleştirmenlerin katıldığı büyük final festivali! Kazanıldığında sefer zaferle biter ve yeni bölgelerin kilidi açılır.
+### 1. 🧊 Dahili 3D Oyun Motoru (`lib/engine3d/`)
+- Harici hantal C++ veya platforma özel kütüphane bağımlılığı olmadan, **saf Dart ve `vector_math`** ile geliştirilmiş akıcı 60/120 FPS 3D grafik motoru.
+- **3D Kamera & Işıklandırma**: Yönlü güneş ışığı (Lambertian diffuse + ambient shading), derinlik sıralaması (Painter's algorithm) ve dinamik izometrik/perspektif kamera kontrolü.
+- **Düşük Poligon (Low-Poly) 3D Modeller**:
+  - 3D Karavan (hareketli tekerlekler, tentesi, bacası ve servis penceresiyle),
+  - 3D Yürüyen Barista (adımlama animasyonu, aşçı şapkası, önlüğü ve fincan taşıma mekaniği),
+  - 3D Müşteriler (oturan ve sipariş bekleyen 3D karakterler),
+  - 3D Mutfak Ekipmanları (Espresso makinesi, kahve değirmeni, akan sulu lavabo, bistrolar ve sandalyeler).
 
-### 2. 📋 Günün Karavan Menüsü (Daily Chalkboard Menu)
-- Karavan kepenklerini açmadan önce günün menüsünde sunulacak kahveleri seçin (Espresso, Latte, Türk Kahvesi, Cappuccino, V60 Filtre, Buzlu Latte, Mocha vb.).
-- Müşteriler sadece karatahtada yazılı kahveleri sipariş eder! Menü çeşitliliği kazancı artırırken servis temposunu zorlaştırır.
+### 2. ☕ 3D Karavan Mutfak & Kafe Simülasyonu (`lib/screens3d/caravan_3d_kitchen_screen.dart`)
+- **İzometrik 3D Kontrol**: Sol alttaki sanal analog joystick ile 3D baristanızı karavan içinde ve dışındaki bistro masalarında serbestçe gezdirin.
+- **Etkileşimli Tezgah Döngüsü (PlateUp / Overcooked Tarzı)**:
+  1. ⚙️ **3D Değirmen**: Yanına gidip taze çekirdek öğütün.
+  2. ☕ **3D Espresso Makinesi**: Fincan stoğunuzu kullanarak sıcak kahveyi demleyin.
+  3. 🛎️ **3D Müşteri Servisi**: İçeceği masadaki müşteriye teslim edin; müşteri kahveyi içip para ve bahşiş bırakır.
+  4. 🚰 **Kirli Bulaşık ve 3D Lavabo**: Boşalan kirli fincanı masadan alın, lavaboya götürün; su akışı animasyonuyla bulaşıkları yıkayıp temiz fincan rafını doldurun!
 
-### 3. 🚰 Tezgah & Bulaşık Yıkama Döngüsü (The Dishwashing Loop)
-- **Temiz Fincan Stoğu**: Karavanınızın fincan kapasitesi sınırlıdır (örn. Kır Karavanında 4 fincan). Kahve hazırlandığında 1 temiz fincan harcanır.
-- **Kirli Fincanlar & Lavabo**: Müşteriler kahvelerini içtikten sonra kirli fincan bırakırlar. Temiz fincan bittiğinde kahve demlenemez!
-- **Tatmin Edici Bulaşık Yıkama**: Lavaboya dokunarak fincanları yıkayın ve rafa geri dizin (Hızlı yıkama süngeri ile %50 daha hızlı!).
+### 3. 🗺️ 3D Prosedürel Sefer Haritası (`lib/screens3d/caravan_3d_map_screen.dart`)
+- 3D tepe ve çam ağaçlarının arasından kıvrılan yol ağı.
+- Yol üzerindeki 3D sütun duraklara göre hareket eden ve tepeye (Festival Meydanı'na) doğru tırmanan 3D karavan.
+- Dokunarak kamerayı 3D sahnede çevirme ve zumlama.
 
-### 4. ❤️ Müşteri Sabrı & İtibar Kalpleri (Reputation Hearts)
-- Her müşterinin sipariş balonu üzerinde gerçek zamanlı sabır çubuğu geri sayar.
-- Müşteri beklemekten sıkılıp kızgın ayrılırsa karavanınız 1 İtibar Kalbi (❤️) kaybeder.
-- 3 kalp de tükenirse karavan yolda kalır (sefer sona erer), ancak kazanılan tecrübe ve altınlar kalıcı garage hesabınıza aktarılır.
+### 4. 🚐 3D Karavan Garajı & 360° Showroom (`lib/screens3d/caravan_3d_garage_screen.dart`)
+- Karavanınızı döner ahşap platform üzerinde **360 derece parmağınızla döndürerek** inceleyin.
+- 4 Farklı Karavan Modeli:
+  - **🚐 Kır Karavanı (Nomad Camper)**
+  - **🚚 Retro Kahve Kamyoneti (Vintage Van)**
+  - **🌟 Gurme Kahve Treyleri (Artisan Trailer)**
+  - **👑 Kraliyet Barista Karavanı (Grand Cruiser)**
 
-### 5. 🚐 Karavan Garajı & Filo Geliştirmeleri (Fleet Upgrades)
-- **🚐 Kır Karavanı (Nomad Camper)**: Kompakt 4 fincan kapasiteli başlangıç karavanı.
-- **🚚 Retro Kahve Kamyoneti (Vintage Van)**: 5 fincan kapasitesi, +%15 demleme hızı, +%25 bahşiş bonusu.
-- **🌟 Gurme Kahve Treyleri (Artisan Trailer)**: 6 fincan kapasitesi, çift kazanlı yüksek basınç, +%35 bahşiş.
-- **👑 Kraliyet Barista Karavanı (Grand Cruiser)**: 8 fincan kapasitesi, +%50 demleme hızı, otomatik durulama.
-
-### 6. 🪴 Karavan Yadigarları (Relics & Trinkets)
-- **🪴 Sukulent Saksısı**: Müşteri sabrını %20 artırır.
-- **📻 Nostaljik Akustik Radyo**: Caz melodileri ile bahşiş gelirini %25 artırır.
-- **🧽 Sihirli Yıkama Süngeri**: Bulaşık yıkama hızını 2 katına çıkarır.
-- **⚡ Termal Kahve Pompası**: Demleme hazırlığını hızlandırır.
-- **🌾 Efsanevi Hasat Çuvalı**: Her servis gününde kasaya ekstra altın kazandırır.
-- **✨ Sıcak Peri Işıkları**: Karavan akşam aydınlatması ile hem sabır hem bahşiş bonusu.
-
-### 7. ☕ İnteraktif Barista Demleme Deneyimi
-- **Hızlı Demleme**: Servis esnasında tek tıkla otomatik akış.
-- **Hassas Barista İstasyonu**: Çekirdek seçimi, ibreli hassas öğütme mini-oyunu (sweet spot), portafiltre sıkıştırma (tamping), közde Türk kahvesi köpürme kontrolü, V60 döküşü ve serbest dokunmatik Latte Art çizim tuvali.
+### 5. 📋 Günün Menüsü, Yadigarlar ve İtibar Kalpleri
+- 3 İtibar Kalbi (❤️❤️❤️): Sabırsız müşteri ayrıldığında kalp eksilir.
+- Karatahta üzerinden aktif menüyü belirleme.
+- Yadigarlar (Relics): Sukulent (+%20 sabır), Ahşap Radyo (+%25 bahşiş), Sihirli Sünger (%50 hızlı bulaşık yıkama).
 
 ---
 
@@ -54,40 +47,30 @@ Steam'deki popüler **Coffee Caravan** tarzında geliştirilmiş; sevimli karava
 
 ```
 lib/
-├── main.dart                          # Uygulama başlangıcı ve tema
+├── engine3d/                          # Dahili 3D Oyun Motoru
+│   ├── camera3d.dart                  # İzometrik & perspektif kamera, yörünge kontrolü
+│   ├── mesh3d.dart                    # 3D tepe noktaları, poligon yüzeyler ve küp/silindir üreticileri
+│   ├── models3d.dart                  # Karavan, yürüyen barista, müşteri, espresso makinesi, lavabo
+│   └── renderer3d.dart                # Derinlik sıralaması (Z-sort), güneş ışıklandırması ve izdüşüm
+├── screens3d/                         # 3D Oyun Ekranları
+│   ├── caravan_3d_kitchen_screen.dart # İzometrik mutfak tezgahı, joystick ve bulaşık yıkama
+│   ├── caravan_3d_map_screen.dart     # 3D arazide kıvrılan yol haritası ve karavan sürüşü
+│   └── caravan_3d_garage_screen.dart  # 360° döner platformlu 3D karavan inceleme
 ├── models/
 │   ├── caravan_model.dart             # Karavan modelleri, yadigarlar (relics), bölgeler
 │   ├── expedition_model.dart          # Prosedürel harita üretimi, düğümler, sefer durumu
 │   ├── mystery_event.dart             # Rastgele yol olayları ve interaktif seçimler
 │   ├── coffee_recipe.dart             # Kahve tarifleri, puanlama algoritması, çekirdek/öğütme
-│   ├── customer_order.dart            # Müşteri diyalogları ve sabır havuzu
-│   ├── game_state.dart                # Kalıcı kayıt, garaj kilidi açma, seviye ve unvan
-│   └── shop_item.dart                 # Kalıcı mağaza ekipmanları ve fincanlar
+│   └── game_state.dart                # Kalıcı kayıt, garaj kilidi açma, seviye ve unvan
 ├── screens/
-│   ├── home_screen.dart               # Coffee Caravan ana lobi ve sefer başlatma kartı
-│   ├── caravan_map_screen.dart        # İnteraktif dallanan yolculuk haritası
-│   ├── caravan_shift_screen.dart      # Karavan tezgahı, müşteri kuyruğu ve bulaşık lavabosu
+│   ├── home_screen.dart               # Ana lobi, 3D sefer başlatma ve serbest 3D kafe kartı
 │   ├── daily_menu_dialog.dart         # Günün menüsü karatahta planlayıcısı
-│   ├── caravan_garage_screen.dart     # Karavan filosu ve model yükseltmeleri
-│   ├── caravan_shop_screen.dart       # Sefer içi mola pazarı (relic & tarifler)
+│   ├── caravan_shop_screen.dart       # Sefer içi mola pazarı
 │   ├── mystery_event_screen.dart      # Yol karşılaşmaları hikaye ekranı
 │   ├── treasure_screen.dart           # Tedarik sandığı ödül seçimi
-│   ├── brewing_station_screen.dart    # 5 adımlı detaylı demleme ve öğütme istasyonu
-│   ├── latte_art_screen.dart          # Dokunmatik Latte Art tuvali
-│   ├── order_result_screen.dart       # Yıldız değerlendirmesi ve bahşiş dökümü
-│   ├── recipe_book_screen.dart        # Kahve ansiklopedisi ve eğitim rehberi
-│   └── settings_screen.dart           # Ses, titreşim ve kontrol ayarları
-├── utils/
-│   ├── app_colors.dart                # Sıcak kahve tonları, pastel yeşil ve karavan paleti
-│   └── app_theme.dart                 # Material 3 koyu tema
+│   └── settings_screen.dart           # Ses ve kontrol ayarları
 └── widgets/
-    ├── caravan_map_painter.dart       # Prosedürel harita yol çizimi CustomPainter
-    ├── coffee_cup_painter.dart        # Dinamik fincan ve krema CustomPainter
-    ├── coffee_machine_widget.dart     # Espresso, Türk cezvesi ve V60 widget'ı
-    ├── grinder_widget.dart            # İbreli öğütme sweet spot mini-oyunu
-    ├── customer_dialogue_widget.dart  # Müşteri avatarı ve sayaç
-    ├── sound_service.dart             # Titreşim (haptic) ve ses efektleri
-    └── steam_animation.dart           # Yükselen duman ve buhar animasyonu
+    └── sound_service.dart             # Titreşim (haptic) ve ses efektleri
 ```
 
 ---
@@ -101,6 +84,6 @@ flutter pub get
 # Kod analizini çalıştır (0 hata / 0 uyarı)
 flutter analyze
 
-# Birim ve widget testlerini çalıştır
+# Birim, widget ve 3D motor testlerini çalıştır
 flutter test
 ```
