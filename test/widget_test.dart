@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game_coffee/engine3d/camera3d.dart';
-import 'package:game_coffee/engine3d/mesh3d.dart';
 import 'package:game_coffee/engine3d/models3d.dart';
 import 'package:game_coffee/main.dart';
 import 'package:game_coffee/models/caravan_model.dart';
