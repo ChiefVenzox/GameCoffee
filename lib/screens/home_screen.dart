@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import '../models/caravan_model.dart';
 import '../models/coffee_recipe.dart';
-import '../models/customer_order.dart';
+import '../models/expedition_model.dart';
 import '../models/game_state.dart';
 import '../utils/app_colors.dart';
 import '../widgets/sound_service.dart';
 import '../widgets/steam_animation.dart';
 import 'brewing_station_screen.dart';
+import 'caravan_garage_screen.dart';
+import 'caravan_map_screen.dart';
+import 'daily_menu_dialog.dart';
 import 'recipe_book_screen.dart';
 import 'settings_screen.dart';
 import 'shop_screen.dart';
@@ -13,22 +17,88 @@ import 'shop_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  void _startCareerMode(BuildContext context) {
+  void _startNewExpedition(BuildContext context, String regionId) {
     SoundService().playClick();
-    final order = CustomerOrder.getRandomOrder();
+    final gameState = GameState();
+    final expedition = ExpeditionState();
+
+    final tier = CaravanTier.allTiers.firstWhere(
+      (t) => t.id.name == gameState.activeCaravanTierId,
+      orElse: () => CaravanTier.allTiers.first,
+    );
+
+    expedition.startNewRun(
+      regionId: regionId,
+      tierId: tier.id,
+      initialUnlockedRecipes: gameState.unlockedRecipeIds,
+    );
+
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => BrewingStationScreen(
-          customerOrder: order,
-          targetRecipe: order.recipe,
-        ),
+      MaterialPageRoute(builder: (context) => const CaravanMapScreen()),
+    );
+  }
+
+  void _showRegionSelectDialog(BuildContext context) {
+    SoundService().playClick();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.bgCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Text('🗺️', style: TextStyle(fontSize: 24)),
+                    SizedBox(width: 8),
+                    Text(
+                      'Sefer Bölgesi Seçin',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.goldenCrema,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                ...CaravanRegion.allRegions.map((region) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: const BorderSide(color: AppColors.borderSubtle),
+                      ),
+                      tileColor: AppColors.bgDark,
+                      leading: Text(region.icon, style: const TextStyle(fontSize: 26)),
+                      title: Text(region.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                      subtitle: Text(region.subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.lightCrema),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _startNewExpedition(context, region.id);
+                      },
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   void _startFreeBrewMode(BuildContext context) {
     SoundService().playClick();
-    // Pick from a dialog or default to classic Latte
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.bgCard,
@@ -44,9 +114,9 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '🎨 Hazırlamak İstediğin Kahveyi Seç',
+                  '🎨 Serbest Deneme Kahvesi Seç',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
                     color: AppColors.goldenCrema,
                   ),
@@ -87,6 +157,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gameState = GameState();
+    final expedition = ExpeditionState();
 
     return Scaffold(
       backgroundColor: AppColors.bgDark,
@@ -109,14 +180,14 @@ class HomeScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.goldenCrema),
                         ),
-                        child: const Text('☕', style: TextStyle(fontSize: 22)),
+                        child: const Text('🚐', style: TextStyle(fontSize: 22)),
                       ),
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'BARISTA MASTER',
+                            'COFFEE CARAVAN',
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w900,
@@ -125,7 +196,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Kahve Dükkanı Simülatörü',
+                            'Mobil Kafe & Roguelite Macerası',
                             style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                           ),
                         ],
@@ -150,20 +221,109 @@ class HomeScreen extends StatelessWidget {
                 listenable: gameState,
                 builder: (context, _) {
                   return Container(
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.warmCoffee,
-                          AppColors.bgCard,
-                        ],
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2E1A0F), Color(0xFF160E08)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: AppColors.borderSubtle, width: 1.5),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black45, blurRadius: 12, offset: Offset(0, 6)),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.borderSubtle),
+                    ),
+                    child: Row(
+                      children: [
+                        const Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Text('🧑‍🍳', style: TextStyle(fontSize: 38)),
+                            Positioned(
+                              top: -4,
+                              child: SteamAnimation(height: 18, steamColor: Colors.white54),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                gameState.baristaTitle,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.goldenCrema,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'Seviye ${gameState.level} Barista • ${gameState.totalCoffeesServed} Kahve Servis Edildi',
+                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              ),
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: gameState.levelProgress,
+                                  minHeight: 4,
+                                  backgroundColor: Colors.white10,
+                                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.goldenCrema),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgDark,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.goldenCrema),
+                          ),
+                          child: Row(
+                            children: [
+                              const Text('💰', style: TextStyle(fontSize: 14)),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${gameState.coins}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.goldenCrema, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 18),
+
+              // HERO CARAVAN EXPEDITION CARD (The Coffee Caravan Loop)
+              ListenableBuilder(
+                listenable: expedition,
+                builder: (context, _) {
+                  final isRunActive = expedition.isRunActive;
+
+                  return Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isRunActive
+                            ? [const Color(0xFF1B3828), const Color(0xFF2E4B34)]
+                            : [const Color(0xFFC86432), const Color(0xFF6B3012)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isRunActive ? Colors.green : Colors.deepOrange).withValues(alpha: 0.35),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
+                        ),
                       ],
                     ),
                     child: Column(
@@ -172,41 +332,66 @@ class HomeScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  gameState.baristaTitle,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.goldenCrema,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Seviye ${gameState.level} Barista',
-                                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                                ),
-                              ],
-                            ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.bgDark,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.5)),
+                                color: Colors.black38,
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Row(
+                              child: Text(
+                                isRunActive ? 'AKTİF SEFER SÜRÜYOR' : 'ROGUELITE SEFERİ',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                            ),
+                            if (isRunActive)
+                              Row(
+                                children: List.generate(ExpeditionState.maxHearts, (i) {
+                                  return Text(i < expedition.reputationHearts ? '❤️' : '🖤', style: const TextStyle(fontSize: 13));
+                                }),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Container(
+                              width: 58,
+                              height: 58,
+                              decoration: BoxDecoration(
+                                color: Colors.black26,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Center(
+                                child: Text(isRunActive ? '🗺️' : '🚐', style: const TextStyle(fontSize: 32)),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('🪙', style: TextStyle(fontSize: 16)),
-                                  const SizedBox(width: 6),
                                   Text(
-                                    '${gameState.coins} ₺',
+                                    isRunActive ? expedition.currentRegion.name : 'Kahve Karavanı Seferine Çık',
                                     style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.greenAccent,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    isRunActive
+                                        ? 'Gün ${expedition.currentLayer + 1}/${ExpeditionState.totalLayers} • ${expedition.runCoins} Altın • ${expedition.activeRelicIds.length} Relic'
+                                        : 'Rastgele haritada kasabaları gez, kahve yap, ekipmanını geliştir ve Festivale ulaş!',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white.withValues(alpha: 0.9),
+                                      height: 1.3,
                                     ),
                                   ),
                                 ],
@@ -214,132 +399,82 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 18),
 
-                        // XP Progress Bar
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Seviye İlerlemesi', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                            Text(
-                              '${(gameState.levelProgress * 100).toInt()}%',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.lightCrema),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: gameState.levelProgress,
-                            backgroundColor: const Color(0xFF0F172A),
-                            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.goldenCrema),
-                            minHeight: 8,
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.goldenCrema,
+                            foregroundColor: Colors.black,
+                            minimumSize: const Size(double.infinity, 46),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
-                        ),
-                        const SizedBox(height: 14),
-
-                        // Quick stats
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem('Servis Edilen', '${gameState.totalCoffeesServed} ☕'),
-                            Container(width: 1, height: 24, color: AppColors.borderSubtle),
-                            _buildStatItem('5 Yıldızlı', '${gameState.fiveStarCount} ⭐'),
-                          ],
+                          icon: Icon(isRunActive ? Icons.map : Icons.play_arrow, size: 20),
+                          label: Text(
+                            isRunActive ? 'SEFER HARİTASINA GİT' : 'YENİ SEFER BAŞLAT',
+                            style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.0),
+                          ),
+                          onPressed: () {
+                            if (isRunActive) {
+                              SoundService().playClick();
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => const CaravanMapScreen()),
+                              );
+                            } else {
+                              _showRegionSelectDialog(context);
+                            }
+                          },
                         ),
                       ],
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 24),
 
-              // Hero Interactive Banner (Cup with Steam)
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF382315), Color(0xFF1E120A)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.borderSubtle),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const Positioned(
-                      top: 10,
-                      child: SteamAnimation(height: 50, width: 90),
-                    ),
-                    Positioned(
-                      bottom: 12,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text('☕', style: TextStyle(fontSize: 48)),
-                          SizedBox(height: 4),
-                          Text(
-                            'Taze Çekilmiş Çekirdek Aroması',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.lightCrema,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // Main Game Action Cards
-              // 1. Müşteri Kariyer Modu
-              _buildMenuCard(
-                title: 'MÜŞTERİ MODU (KARİYER)',
-                subtitle: 'Siparişleri hazırla, müşteri sabrı bitmeden servis et ve bahşiş kazan!',
-                iconEmoji: '🛎️',
-                gradientColors: [const Color(0xFFD97706), const Color(0xFFB45309)],
-                onTap: () => _startCareerMode(context),
-                badge: 'ÖNERİLEN',
-              ),
-              const SizedBox(height: 14),
-
-              // 2. Serbest Barista / Yaratıcı Mod
-              _buildMenuCard(
-                title: 'SERBEST BARİSTA (YARATICI)',
-                subtitle: 'Süre baskısı yok! Tüm kahveleri dene, latte art çizimlerini geliştir.',
-                iconEmoji: '🎨',
-                gradientColors: [const Color(0xFF4A2810), const Color(0xFF26170E)],
-                onTap: () => _startFreeBrewMode(context),
-              ),
-              const SizedBox(height: 14),
-
-              // 3. Row with Shop and Recipe Book
+              // Caravan Management Row (Garage & Daily Menu)
               Row(
                 children: [
                   Expanded(
-                    child: _buildSmallCard(
-                      title: 'Mağaza',
-                      subtitle: 'Ekipman & Çekirdek',
-                      iconEmoji: '🛍️',
+                    child: _buildHubCard(
+                      title: 'Karavan Garajı',
+                      subtitle: 'Filo & Modeller',
+                      iconEmoji: '🚐',
                       onTap: () {
                         SoundService().playClick();
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const ShopScreen()),
+                          MaterialPageRoute(builder: (context) => const CaravanGarageScreen()),
                         );
                       },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildSmallCard(
-                      title: 'Tarif Rehberi',
-                      subtitle: 'Kahve Akademisi',
+                    child: _buildHubCard(
+                      title: 'Günün Menüsü',
+                      subtitle: 'Tezgah Karatahtası',
+                      iconEmoji: '📋',
+                      onTap: () {
+                        SoundService().playClick();
+                        showDialog(
+                          context: context,
+                          builder: (context) => const DailyMenuDialog(),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Secondary Hub Row (Recipe Book & Free Brew)
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildHubCard(
+                      title: 'Tarif Defteri',
+                      subtitle: 'Barista Akademisi',
                       iconEmoji: '📖',
                       onTap: () {
                         SoundService().playClick();
@@ -349,32 +484,60 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildHubCard(
+                      title: 'Serbest Barista',
+                      subtitle: 'Latte Art & Deneme',
+                      iconEmoji: '🎨',
+                      onTap: () => _startFreeBrewMode(context),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 24),
 
-              // Barista Trivia Banner
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.bgCardLight,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderSubtle),
-                ),
-                child: Row(
-                  children: const [
-                    Text('💡', style: TextStyle(fontSize: 22)),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Barista İpucu: Mükemmel bir espresso için su sıcaklığı 90-96°C, ekstraksiyon süresi ise 25-30 saniye olmalıdır!',
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.3),
+              const SizedBox(height: 12),
+
+              // Permanent Equipment Shop
+              InkWell(
+                onTap: () {
+                  SoundService().playClick();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const ShopScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgCard,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.borderSubtle),
+                  ),
+                  child: Row(
+                    children: const [
+                      Text('🛍️', style: TextStyle(fontSize: 26)),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Kalıcı Barista & Ekipman Pazarı',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                            ),
+                            Text(
+                              'Değirmenler, özel çekirdekler ve fincan takımları',
+                              style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.lightCrema),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -382,103 +545,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-        const SizedBox(height: 2),
-        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-      ],
-    );
-  }
-
-  Widget _buildMenuCard({
-    required String title,
-    required String subtitle,
-    required String iconEmoji,
-    required List<Color> gradientColors,
-    required VoidCallback onTap,
-    String? badge,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: gradientColors.first.withValues(alpha: 0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Center(child: Text(iconEmoji, style: const TextStyle(fontSize: 28))),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      if (badge != null) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            badge,
-                            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      height: 1.2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSmallCard({
+  Widget _buildHubCard({
     required String title,
     required String subtitle,
     required String iconEmoji,
@@ -488,7 +555,7 @@ class HomeScreen extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(18),
@@ -497,11 +564,11 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(iconEmoji, style: const TextStyle(fontSize: 28)),
+            Text(iconEmoji, style: const TextStyle(fontSize: 26)),
             const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
             const SizedBox(height: 2),
-            Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+            Text(subtitle, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
           ],
         ),
       ),

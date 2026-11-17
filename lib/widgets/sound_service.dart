@@ -75,4 +75,26 @@ class SoundService {
       HapticFeedback.heavyImpact();
     } catch (_) {}
   }
+
+  /// Coin collection sound & haptics
+  void playCoin() {
+    if (!hapticsEnabled) return;
+    try {
+      HapticFeedback.lightImpact();
+      Future.delayed(const Duration(milliseconds: 60), () {
+        HapticFeedback.selectionClick();
+      });
+    } catch (_) {}
+  }
+
+  /// Level up / Victory fanfare haptics
+  void playLevelUp() {
+    if (!hapticsEnabled) return;
+    try {
+      HapticFeedback.mediumImpact();
+      Future.delayed(const Duration(milliseconds: 100), () {
+        HapticFeedback.heavyImpact();
+      });
+    } catch (_) {}
+  }
 }

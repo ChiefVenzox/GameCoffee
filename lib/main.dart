@@ -30,7 +30,7 @@ class GameCoffeeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Barista Master: Kahve Dükkanı',
+      title: 'Coffee Caravan: Kahve Karavanı',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: const HomeScreen(),
